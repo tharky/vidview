@@ -3,3 +3,9 @@
 19	3806	8117962426621126	CMakeFiles/framewise.dir/src/main.cpp.obj	3a8848e23d15465d
 23	5023	8117962426670744	CMakeFiles/framewise.dir/src/MainWindow.cpp.obj	337bf12e1316e2c5
 5024	5329	8117962476678418	framewise.exe	b5d264cf09956584
+9	402	8117972508490656	build.ninja	76139096c5167a58
+9	402	8117972508490656	C:/Users/harki/Documents/swe/framewise/build/cmake_install.cmake	76139096c5167a58
+49	3528	8117972509624352	CMakeFiles/vidview.dir/src/VideoDecoder.cpp.obj	ad751ef2ff4b15b7
+37	5435	8117972509494334	CMakeFiles/vidview.dir/src/main.cpp.obj	f34b94f06e88abb9
+43	7534	8117972509564346	CMakeFiles/vidview.dir/src/MainWindow.cpp.obj	e90da6afbcb06fad
+7534	7835	8117972584470919	vidview.exe	3a658ac07a071e4a

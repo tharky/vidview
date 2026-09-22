@@ -5,10 +5,14 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/error.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/mathematics.h>
 #include <libswscale/swscale.h>
 }
 
 #include <QByteArray>
+
+#include <algorithm>
+#include <cmath>
 
 namespace {
 
@@ -82,7 +86,7 @@ bool VideoDecoder::open(
         0
     );
 
-    if (videoStreamIndex_ < 0 || decoder == nullptr) {
+    if (videoStreamIndex_ < 0 || !decoder) {
         if (errorMessage) {
             *errorMessage = "No video stream found.";
         }
@@ -94,7 +98,8 @@ bool VideoDecoder::open(
     AVStream* stream =
         formatContext_->streams[videoStreamIndex_];
 
-    codecContext_ = avcodec_alloc_context3(decoder);
+    codecContext_ =
+        avcodec_alloc_context3(decoder);
 
     if (!codecContext_) {
         if (errorMessage) {
@@ -173,9 +178,12 @@ bool VideoDecoder::open(
 
     if (formatContext_->duration != AV_NOPTS_VALUE) {
         duration_ =
-            static_cast<double>(formatContext_->duration)
-            / AV_TIME_BASE;
+            static_cast<double>(
+                formatContext_->duration
+            ) / AV_TIME_BASE;
     }
+
+    draining_ = false;
 
     return true;
 }
@@ -184,9 +192,7 @@ bool VideoDecoder::nextFrame(
     QImage& image,
     double& timestampSeconds
 ) {
-    if (!codecContext_ ||
-        !formatContext_) {
-
+    if (!codecContext_ || !formatContext_) {
         return false;
     }
 
@@ -212,6 +218,10 @@ bool VideoDecoder::nextFrame(
             return false;
         }
 
+        if (draining_) {
+            return false;
+        }
+
         result =
             av_read_frame(
                 formatContext_,
@@ -219,10 +229,19 @@ bool VideoDecoder::nextFrame(
             );
 
         if (result < 0) {
-            avcodec_send_packet(
-                codecContext_,
-                nullptr
-            );
+            result =
+                avcodec_send_packet(
+                    codecContext_,
+                    nullptr
+                );
+
+            draining_ = true;
+
+            if (result < 0 &&
+                result != AVERROR_EOF) {
+
+                return false;
+            }
 
             continue;
         }
@@ -248,6 +267,74 @@ bool VideoDecoder::nextFrame(
             return false;
         }
     }
+}
+
+bool VideoDecoder::seekTo(
+    double seconds,
+    QImage& image,
+    double& timestampSeconds
+) {
+    if (!formatContext_ ||
+        !codecContext_ ||
+        videoStreamIndex_ < 0) {
+
+        return false;
+    }
+
+    seconds = std::max(0.0, seconds);
+
+    if (duration_ > 0.0) {
+        seconds =
+            std::min(seconds, duration_);
+    }
+
+    AVStream* stream =
+        formatContext_->streams[
+            videoStreamIndex_
+        ];
+
+    int64_t targetTimestamp =
+        av_rescale_q(
+            static_cast<int64_t>(
+                std::llround(
+                    seconds * AV_TIME_BASE
+                )
+            ),
+            AV_TIME_BASE_Q,
+            stream->time_base
+        );
+
+    int result =
+        av_seek_frame(
+            formatContext_,
+            videoStreamIndex_,
+            targetTimestamp,
+            AVSEEK_FLAG_BACKWARD
+        );
+
+    if (result < 0) {
+        return false;
+    }
+
+    avcodec_flush_buffers(codecContext_);
+
+    av_packet_unref(packet_);
+    av_frame_unref(frame_);
+
+    draining_ = false;
+
+    while (
+        nextFrame(
+            image,
+            timestampSeconds
+        )
+    ) {
+        if (timestampSeconds >= seconds) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool VideoDecoder::convertCurrentFrame(
@@ -319,13 +406,13 @@ bool VideoDecoder::convertCurrentFrame(
             videoStreamIndex_
         ];
 
-    if (frame_->best_effort_timestamp !=
-        AV_NOPTS_VALUE) {
-
+    if (
+        frame_->best_effort_timestamp !=
+        AV_NOPTS_VALUE
+    ) {
         timestampSeconds =
             frame_->best_effort_timestamp *
             av_q2d(stream->time_base);
-
     } else {
         timestampSeconds = 0.0;
     }
@@ -360,10 +447,14 @@ void VideoDecoder::close() {
     }
 
     videoStreamIndex_ = -1;
+
     width_ = 0;
     height_ = 0;
+
     duration_ = 0.0;
     fps_ = 30.0;
+
+    draining_ = false;
 }
 
 bool VideoDecoder::isOpen() const {

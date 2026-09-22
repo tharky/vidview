@@ -182,7 +182,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=Framewise
+CMAKE_PROJECT_NAME:STATIC=VidView
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=
@@ -336,6 +336,15 @@ Qt6Widgets_DIR:PATH=C:/msys64/ucrt64/lib/cmake/Qt6Widgets
 
 //The directory containing a CMake configuration file for Qt6.
 Qt6_DIR:PATH=C:/msys64/ucrt64/lib/cmake/Qt6
+
+//Value Computed by CMake
+VidView_BINARY_DIR:STATIC=C:/Users/harki/Documents/swe/framewise/build
+
+//Value Computed by CMake
+VidView_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+VidView_SOURCE_DIR:STATIC=C:/Users/harki/Documents/swe/framewise
 
 //Path to a program.
 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=C:/msys64/ucrt64/bin/glslangValidator.exe

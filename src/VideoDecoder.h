@@ -22,6 +22,12 @@ public:
 
     bool nextFrame(QImage& image, double& timestampSeconds);
 
+    bool seekTo(
+        double seconds,
+        QImage& image,
+        double& timestampSeconds
+    );
+
     bool isOpen() const;
 
     double fps() const;
@@ -31,7 +37,10 @@ public:
     int height() const;
 
 private:
-    bool convertCurrentFrame(QImage& image, double& timestampSeconds);
+    bool convertCurrentFrame(
+        QImage& image,
+        double& timestampSeconds
+    );
 
     AVFormatContext* formatContext_ = nullptr;
     AVCodecContext* codecContext_ = nullptr;
@@ -48,4 +57,6 @@ private:
 
     int width_ = 0;
     int height_ = 0;
+
+    bool draining_ = false;
 };

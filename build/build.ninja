@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: Framewise
+# Project: VidView
 # Configurations: Debug
 # =============================================================================
 
@@ -41,60 +41,60 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = C$:/Users/harki/Documents/swe/framewise/build/
 # =============================================================================
-# Object build statements for EXECUTABLE target framewise
+# Object build statements for EXECUTABLE target vidview
 
 
 #############################################
-# Order-only phony target for framewise
+# Order-only phony target for vidview
 
-build cmake_object_order_depends_target_framewise: phony || .
+build cmake_object_order_depends_target_vidview: phony || .
 
-build CMakeFiles/framewise.dir/src/main.cpp.obj: CXX_COMPILER__framewise_unscanned_Debug C$:/Users/harki/Documents/swe/framewise/src/main.cpp || cmake_object_order_depends_target_framewise
+build CMakeFiles/vidview.dir/src/main.cpp.obj: CXX_COMPILER__vidview_unscanned_Debug C$:/Users/harki/Documents/swe/framewise/src/main.cpp || cmake_object_order_depends_target_vidview
   CONFIG = Debug
   DEFINES = -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -DWINVER=0x0A00 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN32_WINNT=0x0A00 -D_WIN64
-  DEP_FILE = CMakeFiles\framewise.dir\src\main.cpp.obj.d
+  DEP_FILE = CMakeFiles\vidview.dir\src\main.cpp.obj.d
   FLAGS = -g -std=gnu++20
   INCLUDES = -isystem C:/msys64/ucrt64/include/qt6/QtWidgets -isystem C:/msys64/ucrt64/include/qt6 -isystem C:/msys64/ucrt64/include/qt6/QtCore -isystem C:/msys64/ucrt64/share/qt6/mkspecs/win32-g++ -isystem C:/msys64/ucrt64/include/qt6/QtGui
-  OBJECT_DIR = CMakeFiles\framewise.dir
-  OBJECT_FILE_DIR = CMakeFiles\framewise.dir\src
+  OBJECT_DIR = CMakeFiles\vidview.dir
+  OBJECT_FILE_DIR = CMakeFiles\vidview.dir\src
 
-build CMakeFiles/framewise.dir/src/MainWindow.cpp.obj: CXX_COMPILER__framewise_unscanned_Debug C$:/Users/harki/Documents/swe/framewise/src/MainWindow.cpp || cmake_object_order_depends_target_framewise
+build CMakeFiles/vidview.dir/src/MainWindow.cpp.obj: CXX_COMPILER__vidview_unscanned_Debug C$:/Users/harki/Documents/swe/framewise/src/MainWindow.cpp || cmake_object_order_depends_target_vidview
   CONFIG = Debug
   DEFINES = -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -DWINVER=0x0A00 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN32_WINNT=0x0A00 -D_WIN64
-  DEP_FILE = CMakeFiles\framewise.dir\src\MainWindow.cpp.obj.d
+  DEP_FILE = CMakeFiles\vidview.dir\src\MainWindow.cpp.obj.d
   FLAGS = -g -std=gnu++20
   INCLUDES = -isystem C:/msys64/ucrt64/include/qt6/QtWidgets -isystem C:/msys64/ucrt64/include/qt6 -isystem C:/msys64/ucrt64/include/qt6/QtCore -isystem C:/msys64/ucrt64/share/qt6/mkspecs/win32-g++ -isystem C:/msys64/ucrt64/include/qt6/QtGui
-  OBJECT_DIR = CMakeFiles\framewise.dir
-  OBJECT_FILE_DIR = CMakeFiles\framewise.dir\src
+  OBJECT_DIR = CMakeFiles\vidview.dir
+  OBJECT_FILE_DIR = CMakeFiles\vidview.dir\src
 
-build CMakeFiles/framewise.dir/src/VideoDecoder.cpp.obj: CXX_COMPILER__framewise_unscanned_Debug C$:/Users/harki/Documents/swe/framewise/src/VideoDecoder.cpp || cmake_object_order_depends_target_framewise
+build CMakeFiles/vidview.dir/src/VideoDecoder.cpp.obj: CXX_COMPILER__vidview_unscanned_Debug C$:/Users/harki/Documents/swe/framewise/src/VideoDecoder.cpp || cmake_object_order_depends_target_vidview
   CONFIG = Debug
   DEFINES = -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -DWINVER=0x0A00 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN32_WINNT=0x0A00 -D_WIN64
-  DEP_FILE = CMakeFiles\framewise.dir\src\VideoDecoder.cpp.obj.d
+  DEP_FILE = CMakeFiles\vidview.dir\src\VideoDecoder.cpp.obj.d
   FLAGS = -g -std=gnu++20
   INCLUDES = -isystem C:/msys64/ucrt64/include/qt6/QtWidgets -isystem C:/msys64/ucrt64/include/qt6 -isystem C:/msys64/ucrt64/include/qt6/QtCore -isystem C:/msys64/ucrt64/share/qt6/mkspecs/win32-g++ -isystem C:/msys64/ucrt64/include/qt6/QtGui
-  OBJECT_DIR = CMakeFiles\framewise.dir
-  OBJECT_FILE_DIR = CMakeFiles\framewise.dir\src
+  OBJECT_DIR = CMakeFiles\vidview.dir
+  OBJECT_FILE_DIR = CMakeFiles\vidview.dir\src
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target framewise
+# Link build statements for EXECUTABLE target vidview
 
 
 #############################################
-# Link the executable framewise.exe
+# Link the executable vidview.exe
 
-build framewise.exe: CXX_EXECUTABLE_LINKER__framewise_Debug CMakeFiles/framewise.dir/src/main.cpp.obj CMakeFiles/framewise.dir/src/MainWindow.cpp.obj CMakeFiles/framewise.dir/src/VideoDecoder.cpp.obj | C$:/msys64/ucrt64/lib/libQt6Widgets.dll.a C$:/msys64/ucrt64/lib/libQt6Gui.dll.a C$:/msys64/ucrt64/lib/libQt6Core.dll.a C$:/msys64/ucrt64/lib/libQt6EntryPoint.a C$:/msys64/ucrt64/lib/libavformat.dll.a C$:/msys64/ucrt64/lib/libavcodec.dll.a C$:/msys64/ucrt64/lib/libswscale.dll.a C$:/msys64/ucrt64/lib/libavutil.dll.a
+build vidview.exe: CXX_EXECUTABLE_LINKER__vidview_Debug CMakeFiles/vidview.dir/src/main.cpp.obj CMakeFiles/vidview.dir/src/MainWindow.cpp.obj CMakeFiles/vidview.dir/src/VideoDecoder.cpp.obj | C$:/msys64/ucrt64/lib/libQt6Widgets.dll.a C$:/msys64/ucrt64/lib/libQt6Gui.dll.a C$:/msys64/ucrt64/lib/libQt6Core.dll.a C$:/msys64/ucrt64/lib/libQt6EntryPoint.a C$:/msys64/ucrt64/lib/libavformat.dll.a C$:/msys64/ucrt64/lib/libavcodec.dll.a C$:/msys64/ucrt64/lib/libswscale.dll.a C$:/msys64/ucrt64/lib/libavutil.dll.a
   CONFIG = Debug
   FLAGS = -g
   LINK_FLAGS = -mwindows
   LINK_LIBRARIES = C:/msys64/ucrt64/lib/libQt6Widgets.dll.a  C:/msys64/ucrt64/lib/libQt6Gui.dll.a  C:/msys64/ucrt64/lib/libQt6Core.dll.a  -lmpr  -luserenv  -lmingw32  C:/msys64/ucrt64/lib/libQt6EntryPoint.a  -lshell32  -ld3d11  -ldxgi  -ldxguid  -ld3d12  C:/msys64/ucrt64/lib/libavformat.dll.a  C:/msys64/ucrt64/lib/libavcodec.dll.a  C:/msys64/ucrt64/lib/libswscale.dll.a  C:/msys64/ucrt64/lib/libavutil.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
-  OBJECT_DIR = CMakeFiles\framewise.dir
+  OBJECT_DIR = CMakeFiles\vidview.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_FILE = framewise.exe
-  TARGET_IMPLIB = libframewise.dll.a
-  TARGET_PDB = framewise.exe.dbg
+  TARGET_FILE = vidview.exe
+  TARGET_IMPLIB = libvidview.dll.a
+  TARGET_PDB = vidview.exe.dbg
 
 
 #############################################
@@ -122,7 +122,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build framewise: phony framewise.exe
+build vidview: phony vidview.exe
 
 # =============================================================================
 # Folder targets.
@@ -132,7 +132,7 @@ build framewise: phony framewise.exe
 #############################################
 # Folder: C:/Users/harki/Documents/swe/framewise/build
 
-build all: phony framewise.exe
+build all: phony vidview.exe
 
 # =============================================================================
 # Built-in targets
