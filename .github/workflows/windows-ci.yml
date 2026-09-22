@@ -1,0 +1,78 @@
+name: Windows CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  windows-build:
+    name: Build and package Windows x64
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Configure Git line endings
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf input
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up MSYS2 UCRT64
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-qt6-base
+            mingw-w64-ucrt-x86_64-qt6-multimedia
+            mingw-w64-ucrt-x86_64-ffmpeg
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-ntldd
+
+      - name: Configure Release build
+        shell: msys2 {0}
+        run: |
+          cmake \
+            -S . \
+            -B build-release \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$MINGW_PREFIX"
+
+      - name: Build Release
+        shell: msys2 {0}
+        run: |
+          cmake \
+            --build build-release \
+            --parallel
+
+      - name: Build deployable Windows package
+        shell: pwsh
+        run: |
+          .\scripts\package.ps1 `
+            -MsysRoot "${{ steps.msys2.outputs.msys2-location }}" `
+            -BuildDir "build-release" `
+            -SkipBuild
+
+      - name: Verify package exists
+        shell: pwsh
+        run: |
+          if (-not (
+              Test-Path `
+                  ".\dist\VidView-Windows-x64.zip"
+          )) {
+              throw "VidView package was not produced."
+          }
+
+          Write-Host "Windows packaging validation passed."

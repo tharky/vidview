@@ -1,6 +1,10 @@
-# CMake build output
+# Build output
 build/
+build-release/
 cmake-build-*/
+
+# Packaged / installer output
+dist/
 
 # Compiled binaries
 *.exe
@@ -9,20 +13,30 @@ cmake-build-*/
 *.o
 *.a
 *.lib
+*.pdb
 
-# CMake generated files
+# CMake / Ninja generated files
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
-.ninja_deps
-.ninja_log
 build.ninja
 rules.ninja
+.ninja_deps
+.ninja_log
 
 # Qt generated files
 *_autogen/
 *.user
 
-# Misc
+# Testing / temporary output
+Testing/
+*.log
+*.tmp
+
+# VS Code cache
 .vscode/.cache/
+
+# Windows junk
+Thumbs.db
+Desktop.ini

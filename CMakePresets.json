@@ -15,12 +15,31 @@
         "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe",
         "CMAKE_PREFIX_PATH": "C:/msys64/ucrt64"
       }
+    },
+    {
+      "name": "ucrt64-release",
+      "displayName": "UCRT64 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-release",
+      "environment": {
+        "PATH": "C:/msys64/ucrt64/bin;$penv{PATH}",
+        "PKG_CONFIG_PATH": "C:/msys64/ucrt64/lib/pkgconfig"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe",
+        "CMAKE_PREFIX_PATH": "C:/msys64/ucrt64"
+      }
     }
   ],
   "buildPresets": [
     {
       "name": "ucrt64-debug",
       "configurePreset": "ucrt64-debug"
+    },
+    {
+      "name": "ucrt64-release",
+      "configurePreset": "ucrt64-release"
     }
   ]
 }

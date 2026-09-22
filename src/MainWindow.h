@@ -31,6 +31,10 @@ public:
     MainWindow();
     ~MainWindow() override;
 
+    void openInitialFile(
+        const QString& path
+    );
+
 protected:
     void dragEnterEvent(
         QDragEnterEvent* event

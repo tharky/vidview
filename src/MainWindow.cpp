@@ -1332,6 +1332,18 @@ MainWindow::~MainWindow() {
     decoderThread_.wait();
 }
 
+void MainWindow::openInitialFile(
+    const QString& path
+) {
+    if (path.isEmpty()) {
+        return;
+    }
+
+    openFile(
+        path
+    );
+}
+
 void MainWindow::chooseFile() {
     QString path =
         QFileDialog::
