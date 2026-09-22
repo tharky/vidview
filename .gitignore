@@ -1,12 +1,28 @@
-#include "MainWindow.h"
+# CMake build output
+build/
+cmake-build-*/
 
-#include <QApplication>
+# Compiled binaries
+*.exe
+*.dll
+*.obj
+*.o
+*.a
+*.lib
 
-int main(int argc, char* argv[]) {
-    QApplication app(argc, argv);
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
 
-    MainWindow window;
-    window.show();
+# Qt generated files
+*_autogen/
+*.user
 
-    return app.exec();
-}
+# Misc
+.vscode/.cache/
