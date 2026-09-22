@@ -576,10 +576,12 @@ MainWindow::MainWindow()
         [this]() {
             timelineDragging_ = true;
 
-            wasPlayingBeforeScrub_ =
-                playing_;
-
-            pausePlayback();
+            /*
+                VidView is an analysis tool:
+                touching the timeline always stops
+                playback before seeking.
+            */
+            hardStopForSeek();
         }
     );
 
@@ -603,11 +605,8 @@ MainWindow::MainWindow()
             seekTo(
                 fraction *
                     duration_,
-                wasPlayingBeforeScrub_
+                false
             );
-
-            wasPlayingBeforeScrub_ =
-                false;
         }
     );
 
@@ -988,20 +987,63 @@ void MainWindow::pausePlayback() {
     playbackTimer_.stop();
     audioPumpTimer_.stop();
 
-    if (
-        audioSink_ &&
-        audioDevice_ &&
-        playing_
-    ) {
-        audioSink_->suspend();
-    }
-
     playing_ = false;
     useAudioClock_ = false;
 
     playButton_->setText(
         "Play"
     );
+
+    /*
+        Do NOT suspend the existing audio stream.
+
+        Fully discard it instead. Keeping a
+        suspended QAudioSink/QIODevice alive
+        was creating a different state from
+        our timeline hard-stop path.
+    */
+    if (audioSink_) {
+        audioSink_->reset();
+    }
+
+    audioDevice_ = nullptr;
+
+    audioQueue_.clear();
+    queuedAudioBytes_ = 0;
+
+    /*
+        If playback starts again from this
+        paused frame, we need to rebuild audio
+        beginning at the current timestamp.
+    */
+    if (
+        hasAudio_ &&
+        playbackSpeed_ == 1.0
+    ) {
+        audioNeedsResync_ = true;
+    }
+}
+
+void MainWindow::hardStopForSeek() {
+    /*
+        First use the exact same shutdown path
+        as a normal manual pause.
+    */
+    pausePlayback();
+
+    /*
+        Seeking also terminates any held
+        frame-step operation.
+    */
+    frameStepTimer_.stop();
+    frameStepDirection_ = 0;
+
+    /*
+        seekTo() is about to establish a new
+        decoder/audio position, so it will not
+        need the pause-resume resync path.
+    */
+    audioNeedsResync_ = false;
 }
 
 void MainWindow::playbackTick() {
@@ -1118,7 +1160,7 @@ void MainWindow::seekTo(
         return;
     }
 
-    pausePlayback();
+    hardStopForSeek();
 
     seconds =
         std::clamp(

@@ -522,6 +522,15 @@ void DecoderWorker::processVideoFrames(
     quint64 generation
 ) {
     while (true) {
+        if (
+            generation !=
+            desiredGeneration_.load(
+                std::memory_order_relaxed
+            )
+        ) {
+            return;
+        }
+
         int result =
             avcodec_receive_frame(
                 videoCodecContext_,
@@ -593,6 +602,15 @@ void DecoderWorker::processAudioFrames(
     }
 
     while (true) {
+        if (
+            generation !=
+            desiredGeneration_.load(
+                std::memory_order_relaxed
+            )
+        ) {
+            return;
+        }
+
         int result =
             avcodec_receive_frame(
                 audioCodecContext_,

@@ -81,6 +81,7 @@ private:
 
     void startPlayback();
     void pausePlayback();
+    void hardStopForSeek();
     void togglePlayback();
 
     void playbackTick();
