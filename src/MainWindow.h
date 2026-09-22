@@ -1,7 +1,9 @@
 #pragma once
 
 #include "DecoderWorker.h"
+#include "VideoWidget.h"
 
+#include <QByteArray>
 #include <QElapsedTimer>
 #include <QImage>
 #include <QMainWindow>
@@ -12,17 +14,19 @@
 
 class QLabel;
 class QPushButton;
-class QSlider;
+class LoopSlider;
 class QComboBox;
 class QAudioSink;
 class QIODevice;
+class QAction;
 
 class QDragEnterEvent;
 class QDropEvent;
 class QKeyEvent;
-class QResizeEvent;
 
-class MainWindow : public QMainWindow {
+class MainWindow final
+    : public QMainWindow {
+
 public:
     MainWindow();
     ~MainWindow() override;
@@ -44,10 +48,6 @@ protected:
         QKeyEvent* event
     ) override;
 
-    void resizeEvent(
-        QResizeEvent* event
-    ) override;
-
 private:
     struct CachedFrame {
         QImage image;
@@ -65,15 +65,26 @@ private:
     static constexpr int AbsoluteMaxHistoryFrames = 120;
     static constexpr int TimelineResolution = 10000;
 
+    void createMenus();
+    void showKeyboardShortcuts();
+
     void chooseFile();
-    void openFile(const QString& path);
+
+    void openFile(
+        const QString& path
+    );
 
     void requestDecode(
-        int frameCount = DecodeBatchFrames
+        int frameCount =
+            DecodeBatchFrames
     );
 
     void nextFrame();
     void previousFrame();
+
+    void startForwardScrub();
+    void startBackwardScrub();
+    void stopFrameScrub();
 
     void consumePendingFrame(
         bool render = true
@@ -97,13 +108,25 @@ private:
 
     void displayCachedFrame();
 
-    void renderCurrentFrame();
     void updateInfo();
+    void updateLoopUi();
 
     void setupAudio();
     void resetAudio();
+
     bool startAudio();
+
     void pumpAudio();
+
+    void setLoopStart();
+    void setLoopEnd();
+    void clearLoop();
+
+    void saveCurrentFrame();
+
+    void changeSpeed(
+        int direction
+    );
 
     QString formatTime(
         double seconds
@@ -112,41 +135,82 @@ private:
     DecoderWorker* worker_ = nullptr;
     QThread decoderThread_;
 
-    QLabel* videoLabel_ = nullptr;
+    VideoWidget* videoWidget_ = nullptr;
+
     QLabel* infoLabel_ = nullptr;
     QLabel* timeLabel_ = nullptr;
 
-    QPushButton* openButton_ = nullptr;
     QPushButton* previousButton_ = nullptr;
     QPushButton* playButton_ = nullptr;
     QPushButton* nextButton_ = nullptr;
 
-    QSlider* timeline_ = nullptr;
+    QPushButton* loopStartButton_ = nullptr;
+    QPushButton* loopEndButton_ = nullptr;
+    QPushButton* clearLoopButton_ = nullptr;
+
+    LoopSlider* timeline_ = nullptr;
     QComboBox* speedBox_ = nullptr;
+
+    /*
+        QAction shortcuts work at the window
+        level even when a child widget has focus.
+    */
+    QAction* openAction_ = nullptr;
+    QAction* saveFrameAction_ = nullptr;
+    QAction* exitAction_ = nullptr;
+
+    QAction* playPauseAction_ = nullptr;
+    QAction* previousFrameAction_ = nullptr;
+    QAction* nextFrameAction_ = nullptr;
+
+    QAction* seekBackAction_ = nullptr;
+    QAction* seekForwardAction_ = nullptr;
+
+    QAction* seekBackFineAction_ = nullptr;
+    QAction* seekForwardFineAction_ = nullptr;
+
+    QAction* speedDownAction_ = nullptr;
+    QAction* speedUpAction_ = nullptr;
+
+    QAction* loopStartAction_ = nullptr;
+    QAction* loopEndAction_ = nullptr;
+    QAction* clearLoopAction_ = nullptr;
+
+    QAction* fullscreenAction_ = nullptr;
+    QAction* shortcutsAction_ = nullptr;
 
     QTimer playbackTimer_;
     QTimer audioPumpTimer_;
-
-    // NEW: held , / . frame stepping
     QTimer frameStepTimer_;
-    int frameStepDirection_ = 0;
 
     QElapsedTimer playbackClock_;
 
     QAudioSink* audioSink_ = nullptr;
     QIODevice* audioDevice_ = nullptr;
 
-    std::deque<CachedFrame> frameHistory_;
-    std::deque<CachedFrame> pendingFrames_;
+    std::deque<CachedFrame>
+        frameHistory_;
 
-    std::deque<AudioChunk> audioQueue_;
+    std::deque<CachedFrame>
+        pendingFrames_;
+
+    std::deque<AudioChunk>
+        audioQueue_;
 
     int historyIndex_ = -1;
-    int maxHistoryFrames_ = 30;
+
+    int maxHistoryFrames_ = 24;
+
+    int frameStepDirection_ = 0;
+
+    int sourceWidth_ = 0;
+    int sourceHeight_ = 0;
 
     QImage currentFrame_;
 
     qint64 currentFrameNumber_ = 0;
+
+    qsizetype queuedAudioBytes_ = 0;
 
     double currentTimestamp_ = 0.0;
     double fps_ = 30.0;
@@ -154,7 +218,12 @@ private:
 
     double playbackSpeed_ = 1.0;
 
-    double playbackAnchorTimestamp_ = 0.0;
+    double playbackAnchorTimestamp_ =
+        0.0;
+
+    double loopStart_ = -1.0;
+    double loopEnd_ = -1.0;
+
     qint64 audioProcessedAtStart_ = 0;
 
     quint64 generation_ = 0;
@@ -163,9 +232,9 @@ private:
     bool decodeInFlight_ = false;
 
     bool playing_ = false;
+
     bool hasAudio_ = false;
     bool useAudioClock_ = false;
-    qsizetype queuedAudioBytes_ = 0;
 
     bool awaitingFirstFrame_ = false;
     bool manualStepWaiting_ = false;
@@ -173,7 +242,6 @@ private:
     bool audioNeedsResync_ = false;
 
     bool resumeAfterSeek_ = false;
-    bool wasPlayingBeforeScrub_ = false;
 
     bool timelineDragging_ = false;
 };

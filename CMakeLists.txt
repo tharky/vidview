@@ -11,6 +11,8 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Multimedia
+    OpenGL
+    OpenGLWidgets
 )
 
 find_package(PkgConfig REQUIRED)
@@ -34,11 +36,19 @@ add_executable(vidview WIN32
 
     src/DecoderWorker.cpp
     src/DecoderWorker.h
+
+    src/VideoWidget.cpp
+    src/VideoWidget.h
+
+    src/LoopSlider.cpp
+    src/LoopSlider.h
 )
 
 target_link_libraries(vidview
     PRIVATE
         Qt6::Widgets
         Qt6::Multimedia
+        Qt6::OpenGL
+        Qt6::OpenGLWidgets
         PkgConfig::FFMPEG
 )

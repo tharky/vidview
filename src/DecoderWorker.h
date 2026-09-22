@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QObject>
 #include <QString>
+
 #include <atomic>
 
 struct AVCodecContext;
@@ -13,12 +14,33 @@ struct AVPacket;
 struct SwsContext;
 struct SwrContext;
 
-class DecoderWorker final : public QObject {
+class DecoderWorker final
+    : public QObject {
+
     Q_OBJECT
 
 public:
-    explicit DecoderWorker(QObject* parent = nullptr);
+    explicit DecoderWorker(
+        QObject* parent = nullptr
+    );
+
     ~DecoderWorker() override;
+
+    /*
+        Safe to call directly from GUI thread.
+
+        It only touches an atomic and allows
+        currently-running decode work to abort
+        when a seek/open happens.
+    */
+    void setDesiredGeneration(
+        quint64 generation
+    ) noexcept {
+        desiredGeneration_.store(
+            generation,
+            std::memory_order_relaxed
+        );
+    }
 
     void openFile(
         const QString& path,
@@ -34,14 +56,6 @@ public:
         double seconds,
         quint64 generation
     );
-
-    // Thread-safe. May be called directly from the GUI thread.
-    void setDesiredGeneration(quint64 generation) noexcept {
-        desiredGeneration_.store(
-            generation,
-            std::memory_order_relaxed
-        );
-    }
 
     void closeFile();
 
@@ -107,18 +121,29 @@ private:
 
     void resetResampler();
 
-    AVFormatContext* formatContext_ = nullptr;
+    AVFormatContext* formatContext_ =
+        nullptr;
 
-    AVCodecContext* videoCodecContext_ = nullptr;
-    AVCodecContext* audioCodecContext_ = nullptr;
+    AVCodecContext* videoCodecContext_ =
+        nullptr;
 
-    AVFrame* videoFrame_ = nullptr;
-    AVFrame* audioFrame_ = nullptr;
+    AVCodecContext* audioCodecContext_ =
+        nullptr;
 
-    AVPacket* packet_ = nullptr;
+    AVFrame* videoFrame_ =
+        nullptr;
 
-    SwsContext* swsContext_ = nullptr;
-    SwrContext* swrContext_ = nullptr;
+    AVFrame* audioFrame_ =
+        nullptr;
+
+    AVPacket* packet_ =
+        nullptr;
+
+    SwsContext* swsContext_ =
+        nullptr;
+
+    SwrContext* swrContext_ =
+        nullptr;
 
     int videoStreamIndex_ = -1;
     int audioStreamIndex_ = -1;
@@ -134,10 +159,14 @@ private:
 
     quint64 activeGeneration_ = 0;
 
+    std::atomic<quint64>
+        desiredGeneration_{0};
+
     bool eof_ = false;
 
-    static constexpr int AudioSampleRate = 48000;
-    static constexpr int AudioChannels = 2;
+    static constexpr int AudioSampleRate =
+        48000;
 
-    std::atomic<quint64> desiredGeneration_{0};
+    static constexpr int AudioChannels =
+        2;
 };

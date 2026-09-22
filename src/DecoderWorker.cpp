@@ -18,8 +18,12 @@ extern "C" {
 
 namespace {
 
-QString ffmpegError(int errorCode) {
-    char buffer[AV_ERROR_MAX_STRING_SIZE]{};
+QString ffmpegError(
+    int errorCode
+) {
+    char buffer[
+        AV_ERROR_MAX_STRING_SIZE
+    ]{};
 
     av_strerror(
         errorCode,
@@ -27,12 +31,16 @@ QString ffmpegError(int errorCode) {
         sizeof(buffer)
     );
 
-    return QString::fromUtf8(buffer);
+    return QString::fromUtf8(
+        buffer
+    );
 }
 
 }
 
-DecoderWorker::DecoderWorker(QObject* parent)
+DecoderWorker::DecoderWorker(
+    QObject* parent
+)
     : QObject(parent) {
 }
 
@@ -46,7 +54,9 @@ bool DecoderWorker::openCodec(
     QString& errorMessage
 ) {
     AVStream* stream =
-        formatContext_->streams[streamIndex];
+        formatContext_->streams[
+            streamIndex
+        ];
 
     const AVCodec* codec =
         avcodec_find_decoder(
@@ -54,12 +64,16 @@ bool DecoderWorker::openCodec(
         );
 
     if (!codec) {
-        errorMessage = "Could not find decoder.";
+        errorMessage =
+            "Could not find decoder.";
+
         return false;
     }
 
     codecContext =
-        avcodec_alloc_context3(codec);
+        avcodec_alloc_context3(
+            codec
+        );
 
     if (!codecContext) {
         errorMessage =
@@ -69,10 +83,10 @@ bool DecoderWorker::openCodec(
     }
 
     int result =
-    avcodec_parameters_to_context(
-        codecContext,
-        stream->codecpar
-    );
+        avcodec_parameters_to_context(
+            codecContext,
+            stream->codecpar
+        );
 
     if (result < 0) {
         errorMessage =
@@ -86,7 +100,10 @@ bool DecoderWorker::openCodec(
         return false;
     }
 
-    if (codec->type == AVMEDIA_TYPE_VIDEO) {
+    if (
+        codec->type ==
+        AVMEDIA_TYPE_VIDEO
+    ) {
         codecContext->thread_count = 0;
 
         codecContext->thread_type =
@@ -122,11 +139,12 @@ void DecoderWorker::openFile(
 ) {
     closeFile();
 
-    activeGeneration_ = generation;
+    activeGeneration_ =
+        generation;
 
     desiredGeneration_.store(
-    generation,
-    std::memory_order_relaxed
+        generation,
+        std::memory_order_relaxed
     );
 
     QByteArray encodedPath =
@@ -175,6 +193,7 @@ void DecoderWorker::openFile(
         );
 
         closeFile();
+
         return;
     }
 
@@ -188,7 +207,9 @@ void DecoderWorker::openFile(
             0
         );
 
-    if (videoStreamIndex_ < 0) {
+    if (
+        videoStreamIndex_ < 0
+    ) {
         emit opened(
             false,
             "No video stream found.",
@@ -201,17 +222,19 @@ void DecoderWorker::openFile(
         );
 
         closeFile();
+
         return;
     }
 
     QString errorMessage;
 
-    if (!openCodec(
+    if (
+        !openCodec(
             videoStreamIndex_,
             videoCodecContext_,
             errorMessage
-        )) {
-
+        )
+    ) {
         emit opened(
             false,
             errorMessage,
@@ -224,6 +247,7 @@ void DecoderWorker::openFile(
         );
 
         closeFile();
+
         return;
     }
 
@@ -276,7 +300,10 @@ void DecoderWorker::openFile(
     packet_ =
         av_packet_alloc();
 
-    if (!videoFrame_ || !packet_) {
+    if (
+        !videoFrame_ ||
+        !packet_
+    ) {
         emit opened(
             false,
             "Could not allocate FFmpeg frame/packet.",
@@ -289,10 +316,9 @@ void DecoderWorker::openFile(
         );
 
         closeFile();
+
         return;
     }
-
-    // optional audio, if it fails vid can still play
 
     audioStreamIndex_ =
         av_find_best_stream(
@@ -306,15 +332,18 @@ void DecoderWorker::openFile(
 
     bool hasAudio = false;
 
-    if (audioStreamIndex_ >= 0) {
+    if (
+        audioStreamIndex_ >= 0
+    ) {
         QString audioError;
 
-        if (openCodec(
+        if (
+            openCodec(
                 audioStreamIndex_,
                 audioCodecContext_,
                 audioError
-            )) {
-
+            )
+        ) {
             audioFrame_ =
                 av_frame_alloc();
 
@@ -327,9 +356,12 @@ void DecoderWorker::openFile(
                     &stereo,
                     AV_SAMPLE_FMT_S16,
                     AudioSampleRate,
-                    &audioCodecContext_->ch_layout,
-                    audioCodecContext_->sample_fmt,
-                    audioCodecContext_->sample_rate,
+                    &audioCodecContext_
+                        ->ch_layout,
+                    audioCodecContext_
+                        ->sample_fmt,
+                    audioCodecContext_
+                        ->sample_rate,
                     0,
                     nullptr
                 );
@@ -340,10 +372,10 @@ void DecoderWorker::openFile(
 
             if (
                 result >= 0 &&
+                audioFrame_ &&
                 swr_init(
                     swrContext_
-                ) >= 0 &&
-                audioFrame_
+                ) >= 0
             ) {
                 hasAudio = true;
             } else {
@@ -359,9 +391,13 @@ void DecoderWorker::openFile(
                     );
                 }
 
-                avcodec_free_context(
-                    &audioCodecContext_
-                );
+                if (
+                    audioCodecContext_
+                ) {
+                    avcodec_free_context(
+                        &audioCodecContext_
+                    );
+                }
 
                 audioStreamIndex_ = -1;
             }
@@ -407,9 +443,12 @@ double DecoderWorker::timestampForFrame(
 }
 
 QImage DecoderWorker::convertVideoFrame() {
-    // preview rendering has max resolution of 1080p.
-    constexpr int MaxPreviewWidth = 1920;
-    constexpr int MaxPreviewHeight = 1080;
+    //ui preview capped at 1080
+    constexpr int MaxPreviewWidth =
+        1920;
+
+    constexpr int MaxPreviewHeight =
+        1080;
 
     const int sourceWidth =
         videoFrame_->width;
@@ -422,10 +461,12 @@ QImage DecoderWorker::convertVideoFrame() {
             1.0,
             static_cast<double>(
                 MaxPreviewWidth
-            ) / sourceWidth,
+            ) /
+            sourceWidth,
             static_cast<double>(
                 MaxPreviewHeight
-            ) / sourceHeight
+            ) /
+            sourceHeight
         });
 
     int outputWidth =
@@ -453,7 +494,7 @@ QImage DecoderWorker::convertVideoFrame() {
     QImage image(
         outputWidth,
         outputHeight,
-        QImage::Format_RGB888
+        QImage::Format_RGBA8888
     );
 
     if (image.isNull()) {
@@ -470,15 +511,8 @@ QImage DecoderWorker::convertVideoFrame() {
             ),
             outputWidth,
             outputHeight,
-            AV_PIX_FMT_RGB24,
-
-            /*
-                Preview rendering favors speed.
-                Later OpenGL rendering will
-                replace this path entirely. TODO here
-            */
+            AV_PIX_FMT_RGBA,
             SWS_FAST_BILINEAR,
-
             nullptr,
             nullptr,
             nullptr
@@ -538,8 +572,10 @@ void DecoderWorker::processVideoFrames(
             );
 
         if (
-            result == AVERROR(EAGAIN) ||
-            result == AVERROR_EOF
+            result ==
+                AVERROR(EAGAIN) ||
+            result ==
+                AVERROR_EOF
         ) {
             return;
         }
@@ -567,7 +603,8 @@ void DecoderWorker::processVideoFrames(
             continue;
         }
 
-        discardVideoBefore_ = -1.0;
+        discardVideoBefore_ =
+            -1.0;
 
         QImage image =
             convertVideoFrame();
@@ -618,8 +655,10 @@ void DecoderWorker::processAudioFrames(
             );
 
         if (
-            result == AVERROR(EAGAIN) ||
-            result == AVERROR_EOF
+            result ==
+                AVERROR(EAGAIN) ||
+            result ==
+                AVERROR_EOF
         ) {
             return;
         }
@@ -634,12 +673,6 @@ void DecoderWorker::processAudioFrames(
                 audioStreamIndex_
             );
 
-        /*
-            After seeking FFmpeg lands on an
-            earlier keyframe. Ignore decoded
-            audio until we reach our target.
-        */
-
         if (
             discardAudioBefore_ >= 0.0 &&
             timestamp >= 0.0 &&
@@ -653,7 +686,8 @@ void DecoderWorker::processAudioFrames(
             continue;
         }
 
-        discardAudioBefore_ = -1.0;
+        discardAudioBefore_ =
+            -1.0;
 
         int outputSamples =
             static_cast<int>(
@@ -686,13 +720,17 @@ void DecoderWorker::processAudioFrames(
         );
 
         uint8_t* outputData[1] = {
-            reinterpret_cast<uint8_t*>(
+            reinterpret_cast<
+                uint8_t*
+            >(
                 pcm.data()
             )
         };
 
-        const uint8_t* const* inputData =
-            audioFrame_->extended_data;
+        const uint8_t* const*
+            inputData =
+                audioFrame_
+                    ->extended_data;
 
         int convertedSamples =
             swr_convert(
@@ -700,10 +738,13 @@ void DecoderWorker::processAudioFrames(
                 outputData,
                 outputSamples,
                 inputData,
-                audioFrame_->nb_samples
+                audioFrame_
+                    ->nb_samples
             );
 
-        if (convertedSamples > 0) {
+        if (
+            convertedSamples > 0
+        ) {
             pcm.resize(
                 convertedSamples *
                 AudioChannels *
@@ -731,31 +772,38 @@ void DecoderWorker::decodeBatch(
     quint64 generation
 ) {
     if (
-        generation != activeGeneration_ ||
-        generation != desiredGeneration_.load(
-            std::memory_order_relaxed
-        ) ||
+        generation !=
+            activeGeneration_ ||
+        generation !=
+            desiredGeneration_.load(
+                std::memory_order_relaxed
+            ) ||
         !formatContext_ ||
         eof_
     ) {
-        emit batchFinished(generation);
+        emit batchFinished(
+            generation
+        );
+
         return;
     }
 
     int producedFrames = 0;
 
     while (
-        producedFrames < maxVideoFrames
+        producedFrames <
+        maxVideoFrames
     ) {
-        // A seek/open happened while we were decoding.
-        // Abort this old batch ASAP.
         if (
             generation !=
             desiredGeneration_.load(
                 std::memory_order_relaxed
             )
         ) {
-            emit batchFinished(generation);
+            emit batchFinished(
+                generation
+            );
+
             return;
         }
 
@@ -776,7 +824,9 @@ void DecoderWorker::decodeBatch(
                 generation
             );
 
-            if (audioCodecContext_) {
+            if (
+                audioCodecContext_
+            ) {
                 avcodec_send_packet(
                     audioCodecContext_,
                     nullptr
@@ -808,7 +858,8 @@ void DecoderWorker::decodeBatch(
 
             if (
                 result >= 0 ||
-                result == AVERROR(EAGAIN)
+                result ==
+                    AVERROR(EAGAIN)
             ) {
                 processVideoFrames(
                     producedFrames,
@@ -828,7 +879,8 @@ void DecoderWorker::decodeBatch(
 
             if (
                 result >= 0 ||
-                result == AVERROR(EAGAIN)
+                result ==
+                    AVERROR(EAGAIN)
             ) {
                 processAudioFrames(
                     generation
@@ -836,10 +888,14 @@ void DecoderWorker::decodeBatch(
             }
         }
 
-        av_packet_unref(packet_);
+        av_packet_unref(
+            packet_
+        );
     }
 
-    emit batchFinished(generation);
+    emit batchFinished(
+        generation
+    );
 }
 
 void DecoderWorker::resetResampler() {
@@ -869,16 +925,22 @@ void DecoderWorker::seek(
         std::memory_order_relaxed
     );
 
-    activeGeneration_ = generation;
+    activeGeneration_ =
+        generation;
 
     seconds =
-        std::clamp(
-            seconds,
+        std::max(
             0.0,
-            duration_ > 0.0
-                ? duration_
-                : seconds
+            seconds
         );
+
+    if (duration_ > 0.0) {
+        seconds =
+            std::min(
+                seconds,
+                duration_
+            );
+    }
 
     AVStream* stream =
         formatContext_->streams[
@@ -922,7 +984,9 @@ void DecoderWorker::seek(
         videoCodecContext_
     );
 
-    if (audioCodecContext_) {
+    if (
+        audioCodecContext_
+    ) {
         avcodec_flush_buffers(
             audioCodecContext_
         );
@@ -936,8 +1000,11 @@ void DecoderWorker::seek(
 
     resetResampler();
 
-    discardVideoBefore_ = seconds;
-    discardAudioBefore_ = seconds;
+    discardVideoBefore_ =
+        seconds;
+
+    discardAudioBefore_ =
+        seconds;
 
     eof_ = false;
 
@@ -980,13 +1047,17 @@ void DecoderWorker::closeFile() {
         );
     }
 
-    if (videoCodecContext_) {
+    if (
+        videoCodecContext_
+    ) {
         avcodec_free_context(
             &videoCodecContext_
         );
     }
 
-    if (audioCodecContext_) {
+    if (
+        audioCodecContext_
+    ) {
         avcodec_free_context(
             &audioCodecContext_
         );
@@ -1009,6 +1080,8 @@ void DecoderWorker::closeFile() {
 
     discardVideoBefore_ = -1.0;
     discardAudioBefore_ = -1.0;
+
+    activeGeneration_ = 0;
 
     eof_ = false;
 }
