@@ -1,0 +1,5 @@
+# ninja log v7
+28	2349	8117962426720750	CMakeFiles/framewise.dir/src/VideoDecoder.cpp.obj	4a2401cc43a4b81e
+19	3806	8117962426621126	CMakeFiles/framewise.dir/src/main.cpp.obj	3a8848e23d15465d
+23	5023	8117962426670744	CMakeFiles/framewise.dir/src/MainWindow.cpp.obj	337bf12e1316e2c5
+5024	5329	8117962476678418	framewise.exe	b5d264cf09956584

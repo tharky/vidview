@@ -1,0 +1,3 @@
+C:/Users/harki/Documents/swe/framewise/build/CMakeFiles/framewise.dir
+C:/Users/harki/Documents/swe/framewise/build/CMakeFiles/edit_cache.dir
+C:/Users/harki/Documents/swe/framewise/build/CMakeFiles/rebuild_cache.dir
