@@ -1,6 +1,6 @@
 # VidView
 
-A Windows video player focused on precise frame inspection.
+A Windows MP4 player focused on precise frame inspection.
 
 Built with:
 
@@ -9,4 +9,12 @@ Built with:
 - FFmpeg
 - CMake
 - Ninja
+- Python
 
+# Installation
+
+
+
+# Requirements
+
+- Windows support only

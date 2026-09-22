@@ -14,73 +14,33 @@
 #define VIDVIEW_VERSION "dev"
 #endif
 
-int main(
-    int argc,
-    char* argv[]
-) {
-    /*
-        Configure OpenGL before QApplication
-        creates any graphics resources.
-    */
+namespace {
+
+void configureOpenGL() {
     QSurfaceFormat format;
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setVersion(3, 3);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setSwapInterval(1);
+    QSurfaceFormat::setDefaultFormat(format);
+}
 
-    format.setRenderableType(
-        QSurfaceFormat::OpenGL
-    );
+} // namespace
 
-    format.setVersion(
-        3,
-        3
-    );
+int main(int argc, char* argv[]) {
+    configureOpenGL();
 
-    format.setProfile(
-        QSurfaceFormat::CoreProfile
-    );
+    QApplication app(argc, argv);
 
-    format.setSwapInterval(
-        1
-    );
+    QCoreApplication::setApplicationName("VidView");
+    QCoreApplication::setApplicationVersion(VIDVIEW_VERSION);
+    QCoreApplication::setOrganizationName("VidView");
+    QApplication::setWindowIcon(QIcon(":/VidView.ico"));
 
-    QSurfaceFormat::setDefaultFormat(
-        format
-    );
-
-    QApplication app(
-        argc,
-        argv
-    );
-
-    QCoreApplication::setApplicationName(
-        "VidView"
-    );
-
-    QCoreApplication::setApplicationVersion(
-        VIDVIEW_VERSION
-    );
-
-    QCoreApplication::setOrganizationName(
-        "VidView"
-    );
-
-    QApplication::setWindowIcon(
-        QIcon(
-            ":/VidView.ico"
-        )
-    );
-
-    /*
-        Proper CLI parser gives us:
-          VidView.exe video.mp4
-          VidView.exe --version
-          VidView.exe --help
-          VidView.exe --smoke-test
-    */
     QCommandLineParser parser;
-
     parser.setApplicationDescription(
         "Fast native video inspection and frame analysis."
     );
-
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -88,81 +48,34 @@ int main(
         "smoke-test",
         "Verify that VidView and its runtime dependencies can start."
     );
+    parser.addOption(smokeTestOption);
+    parser.addPositionalArgument("video", "Video file to open.");
+    parser.process(app);
 
-    parser.addOption(
-        smokeTestOption
-    );
-
-    parser.addPositionalArgument(
-        "video",
-        "Video file to open."
-    );
-
-    parser.process(
-        app
-    );
-
-    if (
-        parser.isSet(
-            smokeTestOption
-        )
-    ) {
-        return 0;
-    }
+    if (parser.isSet(smokeTestOption)) return 0;
 
     MainWindow window;
-
     window.show();
 
-    const QStringList arguments =
-        parser.positionalArguments();
+    const QStringList arguments = parser.positionalArguments();
+    if (!arguments.isEmpty()) {
+        const QString path = QFileInfo(arguments.first()).absoluteFilePath();
 
-    if (
-        !arguments.isEmpty()
-    ) {
-        QFileInfo fileInfo(
-            arguments.first()
-        );
+        // Let the event loop start before queueing decoder work.
+        QTimer::singleShot(0, &window, [&window, path]() {
+            const QFileInfo file(path);
 
-        QString path =
-            fileInfo
-                .absoluteFilePath();
-
-        /*
-            Let the Qt event loop start before
-            queueing decoder work.
-        */
-        QTimer::singleShot(
-            0,
-            &window,
-            [
-                &window,
-                path
-            ]() {
-                QFileInfo file(
-                    path
+            if (!file.exists() || !file.isFile()) {
+                QMessageBox::warning(
+                    &window,
+                    "File not found",
+                    QString("VidView could not find:\n%1").arg(path)
                 );
-
-                if (
-                    !file.exists() ||
-                    !file.isFile()
-                ) {
-                    QMessageBox::warning(
-                        &window,
-                        "File not found",
-                        QString(
-                            "VidView could not find:\n%1"
-                        ).arg(path)
-                    );
-
-                    return;
-                }
-
-                window.openInitialFile(
-                    path
-                );
+                return;
             }
-        );
+
+            window.openInitialFile(path);
+        });
     }
 
     return app.exec();
